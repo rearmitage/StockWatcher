@@ -1,6 +1,8 @@
 package com.example.tud23846.stockwatcher;
 
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -8,10 +10,19 @@ import android.view.MenuItem;
 
 public class Main extends Activity {
 
+    FragmentManager fragmentManager = getFragmentManager();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.MainFragment, new DetailsFragment());
+        fragmentTransaction.commit();
+        String[] test = {"YEA","YOO"};
+        URLParser url = new URLParser();
+        new AsyncTaskParseJson(url.News(test));
     }
 
 
@@ -36,4 +47,6 @@ public class Main extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }
