@@ -79,6 +79,8 @@ public class DetailsFragment extends Fragment {
         }
 
         new AsyncGetNews().execute("http://feeds.finance.yahoo.com/rss/2.0/headline?s=GOOG&region=US&lang=en-US");
+        //newsTitle.remove(0);
+        //newsTitle.remove(1);
         newsList.setAdapter(new MyListAdapter(getActivity(), newsTitle, newsLink));
 
         advanced = (AutoCompleteTextView) getActivity().findViewById(R.id.autoCompleteTextView);
