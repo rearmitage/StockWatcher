@@ -85,7 +85,7 @@ public class StockDataProvider extends ContentProvider {
 
         Cursor c = db.query(
                 StockDBContract.StockEntry.TABLE_NAME
-                , new String[]{"_id", StockDBContract.StockEntry.COLUMN_NAME_COMPANY}
+                , new String[]{"_id", StockDBContract.StockEntry.COLUMN_NAME_SYMBOL}
                 , selection
                 , selectionArgs
                 , null

@@ -20,11 +20,88 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Stock"
-            android:id="@+id/btnAddStock"
+            android:text="Search"
+            android:id="@+id/btnsearch"
             android:layout_weight="2" />
 
     </LinearLayout>
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="10"
+        android:layout_weight=".1">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Portfolio"
+            android:id="@+id/btnPortfolio"
+            android:layout_weight="2" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Stock"
+            android:id="@+id/btnAddRemove"
+            android:layout_alignParentRight="true"  />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="29dp"
+        android:weightSum="10">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Name"
+            android:id="@+id/txtName" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Symbol"
+            android:id="@+id/Symbol"
+            android:layout_marginStart="32dp"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/txtName" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Price"
+            android:id="@+id/txtPrice"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Change"
+            android:id="@+id/txtChange"
+            android:layout_marginStart="27dp"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/txtPrice" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Volume"
+            android:id="@+id/Volume"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true" />
+
+
+    </RelativeLayout>
 
 
     <LinearLayout
@@ -37,11 +114,65 @@
         <ImageView
             android:layout_height="match_parent"
             android:layout_width="fill_parent"
-            android:id="@+id/stockGraph"
-            android:layout_weight="10" />
+            android:id="@+id/stockGraph"/>
 
 
     </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="10"
+        android:layout_weight=".1">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1 Day"
+            android:id="@+id/btn1Day"
+            android:layout_weight="2"
+            android:layout_gravity="right"
+            android:textSize="10dp"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5 Days"
+            android:id="@+id/btn5days"
+            android:layout_weight="2"
+            android:layout_gravity="right"
+            android:textSize="10dp"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1 month"
+            android:id="@+id/btn1Month"
+            android:layout_weight="2"
+            android:layout_gravity="right"
+            android:textSize="10dp"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="6 Months"
+            android:id="@+id/btn6months"
+            android:layout_weight="2"
+            android:layout_gravity="right"
+            android:textSize="10dp"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1 Year"
+            android:id="@+id/btn1year"
+            android:layout_weight="2"
+            android:layout_gravity="right"
+            android:textSize="10dp"/>
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:orientation="horizontal"

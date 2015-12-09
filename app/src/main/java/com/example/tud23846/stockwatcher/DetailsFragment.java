@@ -1,6 +1,10 @@
 package com.example.tud23846.stockwatcher;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -13,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -47,13 +52,21 @@ import java.net.URL;
 import java.util.ArrayList;
 
 
-public class DetailsFragment extends Fragment {
+public class DetailsFragment extends Fragment implements View.OnClickListener {
 
-    Button btnAddStock;
+    Button btnAddRemove;
+    Button btnSearch;
+    Button btnPortfolio;
+    Button btn1day;
+    Button btn5days;
+    Button btn1month;
+    Button btn6months;
+    Button btn1year;
+
     AutoCompleteTextView advanced;
     ImageView stockGraph;
     ListView newsList;
-    String myURL = "https://chart.yahoo.com/z?t=%3Cchart_code%3E&s=GOOG";
+    String symbol;
     ArrayList newsTitle = new ArrayList();
     ArrayList newsLink = new ArrayList();
 
@@ -69,18 +82,30 @@ public class DetailsFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //mListener = (OnFragmentInteractionListener) getActivity();
-
-        btnAddStock = (Button) getActivity().findViewById(R.id.btnAddStock);
+        btnSearch = (Button) getActivity().findViewById(R.id.btnsearch);
+            btnSearch.setOnClickListener(this);
+        btnAddRemove = (Button) getActivity().findViewById(R.id.btnAddRemove);
+            btnAddRemove.setOnClickListener(this);
+        btnPortfolio = (Button) getActivity().findViewById(R.id.btnPortfolio);
+            btnPortfolio.setOnClickListener(this);
+        btn1day = (Button) getActivity().findViewById(R.id.btn1Day);
+            btn1day.setOnClickListener(this);
+        btn5days = (Button) getActivity().findViewById(R.id.btn5days);
+            btn5days.setOnClickListener(this);
+        btn1month = (Button) getActivity().findViewById(R.id.btn1Month);
+            btn1month.setOnClickListener(this);
+        btn6months = (Button) getActivity().findViewById(R.id.btn6months);
+            btn6months.setOnClickListener(this);
+        btn1year = (Button) getActivity().findViewById(R.id.btn1year);
+            btn1year.setOnClickListener(this);
         stockGraph = (ImageView) getActivity().findViewById(R.id.stockGraph);
+
         newsList = (ListView) getActivity().findViewById(R.id.lvStockNews);
 
-        if (myURL != null) {
-            new AsyncGetGraph().execute(myURL);
+        if(symbol!=null) {
+            new AsyncGetGraph().execute("https://chart.yahoo.com/z?t=1d&s="+symbol);
+            new AsyncGetNews().execute("http://finance.yahoo.com/rss/2.0/headline?s=GOOG&region=US&lang=en-US");
         }
-
-        new AsyncGetNews().execute("http://feeds.finance.yahoo.com/rss/2.0/headline?s=GOOG&region=US&lang=en-US");
-        //newsTitle.remove(0);
-        //newsTitle.remove(1);
         newsList.setAdapter(new MyListAdapter(getActivity(), newsTitle, newsLink));
 
         advanced = (AutoCompleteTextView) getActivity().findViewById(R.id.autoCompleteTextView);
@@ -109,6 +134,65 @@ public class DetailsFragment extends Fragment {
             }
         });
 
+
+        newsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                String url =(String)newsLink.get(position);
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
+            }
+        });
+
+
+
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        switch (v.getId()) {
+
+            case R.id.btnsearch:
+                symbol = advanced.getText().toString();
+                new AsyncGetGraph().execute("https://chart.yahoo.com/z?t=1d&s="+symbol);
+                new AsyncGetNews().execute("http://finance.yahoo.com/rss/2.0/headline?s="+symbol+"&region=US&lang=en-US");
+                break;
+
+            case R.id.btnAddRemove:
+                // do your code
+                break;
+
+            case R.id.btnPortfolio:
+                // do your code
+                break;
+
+            case R.id.btn1Day:
+                new AsyncGetGraph().execute("https://chart.yahoo.com/z?t=1d&s="+symbol);
+                break;
+
+            case R.id.btn5days:
+                new AsyncGetGraph().execute("https://chart.yahoo.com/z?t=5d&s="+symbol);
+                break;
+
+            case R.id.btn1Month:
+                new AsyncGetGraph().execute("https://chart.yahoo.com/z?t=1m&s="+symbol);
+                break;
+
+            case R.id.btn6months:
+                new AsyncGetGraph().execute("https://chart.yahoo.com/z?t=6m&s="+symbol);
+                break;
+
+            case R.id.btn1year:
+                new AsyncGetGraph().execute("https://chart.yahoo.com/z?t=1y&s="+symbol);
+                break;
+
+            default:
+                break;
+        }
 
     }
 
@@ -248,14 +332,16 @@ public class DetailsFragment extends Fragment {
               return null;
         }
 
-        //@Override
-       // protected void onPostExecute(String[] suggestions) {
-       //     try {
+        @Override
+        protected void onPostExecute(XmlPullParser xml) {
+            try {
 
-       //     } catch (Exception e) {
-      //          e.printStackTrace();
-      //      }
-      //  }
+                newsList.setAdapter(new MyListAdapter(getActivity(), newsTitle, newsLink));
+
+          } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
 
         public void parseXMLAndStoreIt(XmlPullParser myParser) {
@@ -296,6 +382,9 @@ public class DetailsFragment extends Fragment {
 
 
                 }
+                newsTitle.remove(0);
+                newsTitle.remove(1);
+                //Test this next
                 parsingComplete = false;
             }
 
@@ -303,6 +392,43 @@ public class DetailsFragment extends Fragment {
                 e.printStackTrace();
             }
         }
+
+    }
+
+    public class AsyncTextGetInfo extends AsyncTask<String, Void, String[]> {
+        @Override
+        protected String[] doInBackground(String... params) {
+            String[] suggestions = null;
+            try {
+                String url = "http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=" + params[0];
+
+                String response = new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream())).readLine();
+
+                try {
+                    JSONArray responseObject = new JSONArray(response);
+                    suggestions = new String[responseObject.length()];
+                    for (int i = 0; i < responseObject.length(); i++)
+                        suggestions[i] = responseObject.getJSONObject(i).getString("Symbol");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return suggestions;
+        }
+
+        @Override
+        protected void onPostExecute(String[] suggestions) {
+            try {
+                advanced.setAdapter(new ArrayAdapter<>(getActivity().getBaseContext(), android.R.layout.simple_dropdown_item_1line, suggestions));
+                advanced.setThreshold(2);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
 
     }
 }
