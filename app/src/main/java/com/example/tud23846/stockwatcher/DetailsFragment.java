@@ -18,6 +18,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -43,6 +44,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 
 public class DetailsFragment extends Fragment {
@@ -50,7 +52,10 @@ public class DetailsFragment extends Fragment {
     Button btnAddStock;
     AutoCompleteTextView advanced;
     ImageView stockGraph;
-    String myURL;// = "https://chart.yahoo.com/z?t=%3Cchart_code%3E&s=GOOG";
+    ListView newsList;
+    String myURL = "https://chart.yahoo.com/z?t=%3Cchart_code%3E&s=GOOG";
+    ArrayList newsTitle = new ArrayList();
+    ArrayList newsLink = new ArrayList();
 
 
     public static DetailsFragment newInstance(String param1, String param2) {
@@ -67,10 +72,14 @@ public class DetailsFragment extends Fragment {
 
         btnAddStock = (Button) getActivity().findViewById(R.id.btnAddStock);
         stockGraph = (ImageView) getActivity().findViewById(R.id.stockGraph);
+        newsList = (ListView) getActivity().findViewById(R.id.lvStockNews);
 
         if (myURL != null) {
             new AsyncGetGraph().execute(myURL);
         }
+
+        new AsyncGetNews().execute("http://feeds.finance.yahoo.com/rss/2.0/headline?s=GOOG&region=US&lang=en-US");
+        newsList.setAdapter(new MyListAdapter(getActivity(), newsTitle, newsLink));
 
         advanced = (AutoCompleteTextView) getActivity().findViewById(R.id.autoCompleteTextView);
 
@@ -246,6 +255,7 @@ public class DetailsFragment extends Fragment {
       //      }
       //  }
 
+
         public void parseXMLAndStoreIt(XmlPullParser myParser) {
             int event;
             String text = null;
@@ -267,10 +277,12 @@ public class DetailsFragment extends Fragment {
                         case XmlPullParser.END_TAG:
                             if(name.equals("title")){
                                 title = text;
+                                newsTitle.add(title);
                             }
 
                             else if(name.equals("link")){
                                 link = text;
+                                newsLink.add(link);
                             }
 
                             else{
@@ -278,6 +290,9 @@ public class DetailsFragment extends Fragment {
                             break;
                     }
                     event = myParser.next();
+
+
+
                 }
                 parsingComplete = false;
             }
@@ -287,6 +302,6 @@ public class DetailsFragment extends Fragment {
             }
         }
 
-
     }
 }
+
