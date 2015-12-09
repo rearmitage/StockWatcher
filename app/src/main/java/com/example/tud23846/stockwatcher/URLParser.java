@@ -5,7 +5,7 @@ package com.example.tud23846.stockwatcher;
  */
 public class URLParser {
 
-    public void StockInfo(String symbols[]) {
+    public void StockInfo(String[] symbols) {
         int length = symbols.length;
         String symbolString = "";
         while(length > 0)
@@ -15,7 +15,7 @@ public class URLParser {
         String stockInfoURL = "http://finance.yahoo.com/webservice/v1/symbols/" + symbolString + "/quote?format=json&view=basic";
     }
 
-    public String News(String symbols[]){
+    public String News(String[] symbols){
         int length = symbols.length;
         String symbolString = "";
         while(length > 0)
@@ -26,18 +26,13 @@ public class URLParser {
         return newsURL;
     }
 
-    public String StockChart(String symbols[]){
-        int length = symbols.length;
-        String symbolString = "";
-        while(length > 0)
-        {
-            symbolString = symbolString + symbols[length];
-        }
-        String stockChartURL = "https://chart.yahoo.com/z?t=<chart_code>&s=" + symbolString;
+    public String StockChart(String symbol){
+
+        String stockChartURL = "https://chart.yahoo.com/z?t=<chart_code>&s=" + symbol;
         return stockChartURL;
     }
 
-    public String CompanySearch(String symbols[]){
+    public String CompanySearch(String[] symbols){
         int length = symbols.length;
         String symbolString = "";
         while(length > 0)

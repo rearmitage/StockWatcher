@@ -65,7 +65,7 @@ public class StockDataProvider extends ContentProvider {
             pauseFlag = true;
             downloadStockData(selectionArgs[0]);
             while (pauseFlag);
-            saveData(stock.getSymbol(), stock.getName(), stock.getPrice());
+            saveData(stock.getSymbol());
             c = getStockCursor(selection, selectionArgs);
         }
         Log.d("Row count", String.valueOf(c.getCount()));
@@ -157,7 +157,7 @@ public class StockDataProvider extends ContentProvider {
 
 
     // Save stock data to database
-    private void saveData(String symbol, String company, double price){
+    private void saveData(String symbol){
 
         // Gets the data repository in write mode
         db = mDbHelper.getWritableDatabase();
@@ -165,9 +165,6 @@ public class StockDataProvider extends ContentProvider {
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
         values.put(StockDBContract.StockEntry.COLUMN_NAME_SYMBOL, symbol);
-        values.put(StockDBContract.StockEntry.COLUMN_NAME_COMPANY, company);
-        values.put(StockDBContract.StockEntry.COLUMN_NAME_PRICE, price);
-
         // Insert the new row, returning the primary key value of the new row
         long newRowId;
         newRowId = db.insert(
@@ -176,9 +173,9 @@ public class StockDataProvider extends ContentProvider {
                 values);
 
         if (newRowId > 0) {
-            Log.d("Stock data saved ", newRowId + " - " + company);
+            Log.d("Stock data saved ", newRowId + " - " + symbol);
         } else {
-            Log.d("Stock data NOT saved ", newRowId + " - " + company);
+            Log.d("Stock data NOT saved ", newRowId + " - " + symbol);
         }
 
     }
