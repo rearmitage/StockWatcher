@@ -3,39 +3,29 @@ package com.example.tud23846.stockwatcher;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.tud23846.stockwatcher.db.StockDBContract;
-import com.example.tud23846.stockwatcher.db.StockDBHelper;
+public class Main extends Activity implements PortfolioFragment.OnFragmentInteractionListener {
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-
-
-public class Main extends Activity {
+    boolean twoPanes;
 
     FragmentManager fragmentManager = getFragmentManager();
-    SQLiteDatabase db;
-    StockDBHelper mDbHelper;
-    Stock stock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+                twoPanes = (findViewById(R.id.MainFragment) != null);
+
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.MainFragment, new DetailsFragment());
+        fragmentTransaction.add(R.id.MainFragment, new PortfolioFragment());
         fragmentTransaction.commit();
+
+
     }
 
 
@@ -59,6 +49,21 @@ public class Main extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFragmentInteraction(String number) {
+
+            DetailsFragment details = new DetailsFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString("number", number);
+            details.setArguments(bundle);
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.MainFragment, details, "symbol");
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+
+
     }
 
 }

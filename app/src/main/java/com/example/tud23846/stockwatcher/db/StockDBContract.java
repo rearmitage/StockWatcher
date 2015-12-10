@@ -10,10 +10,9 @@ public class StockDBContract {
 
     private static final String TEXT_TYPE = " TEXT";
     private static final String COMMA_SEP = ",";
-    public static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + StockEntry.TABLE_NAME + " (" +
-                    StockEntry.COLUMN_NAME_SYMBOL + TEXT_TYPE + " collate nocase " + COMMA_SEP +
-                    " )";
+    public static final String SQL_CREATE_ENTRIES = "CREATE TABLE " + StockEntry.TABLE_NAME + " (" +
+            StockEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + COMMA_SEP +
+            StockEntry.COLUMN_NAME_SYMBOL + TEXT_TYPE + " REAL" + " )";
 
     public static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + StockEntry.TABLE_NAME;

@@ -78,7 +78,7 @@
             android:text="Price"
             android:id="@+id/txtPrice"
             android:layout_alignParentBottom="true"
-            android:layout_alignStart="@+id/txtVolume" />
+            android:layout_alignParentEnd="true" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -86,7 +86,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="Change"
             android:id="@+id/txtChange"
-            android:layout_below="@+id/txtPrice"
+            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true" />
 
         <TextView
@@ -96,8 +96,7 @@
             android:text="Volume"
             android:id="@+id/txtVolume"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/txtChange"
-            android:layout_marginStart="32dp" />
+            android:layout_alignParentEnd="true" />
 
 
     </RelativeLayout>

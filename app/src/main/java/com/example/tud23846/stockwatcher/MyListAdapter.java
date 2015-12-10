@@ -38,11 +38,6 @@ public class MyListAdapter extends ArrayAdapter<String> {
         textView.setText(newsTitles.get(position).toString());
         // change the icon for Windows and iPhone
         String s = (newsTitles.get(position).toString());
-        //if (s.startsWith("iPhone")) {
-        //    imageView.setImageResource(R.drawable.no);
-       // } else {
-       //     imageView.setImageResource(R.drawable.ok);
-       // }
 
         return rowView;
     }

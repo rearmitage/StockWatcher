@@ -2,9 +2,12 @@ package com.example.tud23846.stockwatcher;
 
 import android.app.Activity;
 import android.content.ClipData;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -25,6 +28,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.tud23846.stockwatcher.db.StockDBContract;
+import com.example.tud23846.stockwatcher.db.StockDBHelper;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -57,6 +64,7 @@ import java.util.ArrayList;
 
 
 public class DetailsFragment extends Fragment implements View.OnClickListener {
+    private OnFragmentInteractionListener mListener;
 
     Button btnAddRemove;
     Button btnSearch;
@@ -71,6 +79,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     TextView txtStockPrice;
     TextView txtStockChange;
     TextView txtStockVolume;
+    String switchtoPort;
 
     AutoCompleteTextView advanced;
     ImageView stockGraph;
@@ -79,18 +88,26 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     ArrayList newsTitle = new ArrayList();
     ArrayList newsLink = new ArrayList();
 
+    Boolean haveStock = false;
+
+    SQLiteDatabase db;
+    StockDBHelper mDbHelper;
+
 
     public static DetailsFragment newInstance(String param1, String param2) {
         DetailsFragment fragment = new DetailsFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
+
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        //mListener = (OnFragmentInteractionListener) getActivity();
+        switchtoPort = "switchToPort";
+        mDbHelper = new StockDBHelper(getActivity());
+        symbol = getArguments().getString("number");
 
         txtStockName = (TextView) getActivity().findViewById(R.id.txtName);
         txtStockSymbol =(TextView) getActivity().findViewById(R.id.txtSymbol);
@@ -117,16 +134,18 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         stockGraph = (ImageView) getActivity().findViewById(R.id.stockGraph);
 
         newsList = (ListView) getActivity().findViewById(R.id.lvStockNews);
-
+        checkDB(symbol);
         if(symbol!=null) {
             new AsyncGetGraph().execute("https://chart.yahoo.com/z?t=1d&s="+symbol);
-            new AsyncGetNews().execute("http://finance.yahoo.com/rss/2.0/headline?s=GOOG&region=US&lang=en-US");
+            new AsyncTextGetInfo().execute(symbol);
+            new AsyncGetNews().execute("http://finance.yahoo.com/rss/2.0/headline?s="+symbol+"&region=US&lang=en-US");
         }
         newsList.setAdapter(new MyListAdapter(getActivity(), newsTitle, newsLink));
 
         advanced = (AutoCompleteTextView) getActivity().findViewById(R.id.autoCompleteTextView);
 
         advanced.addTextChangedListener(new TextWatcher() {
+
 
             // We keep previous length to ensure that we only query for suggestions when the user enters new characters
             int previousTextLength;
@@ -180,11 +199,18 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
                 break;
 
             case R.id.btnAddRemove:
-                // do your code
+
+                    try {
+                        saveData(symbol);
+                        Toast.makeText(getActivity(), "Stock Added", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(getActivity(), "Error Not Added", Toast.LENGTH_SHORT).show();
+                    }
+
                 break;
 
-            case R.id.btnPortfolio:
-                // do your code
+                case R.id.btnPortfolio:
+                    mListener.onFragmentInteraction(switchtoPort);
                 break;
 
             case R.id.btn1Day:
@@ -213,6 +239,10 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
 
     }
 
+    public interface OnFragmentInteractionListener {
+        void onFragmentInteraction(String switchtoPort);
+    }
+
     public void updateSuggestions(String substring) {
         new AsyncTextPrediction().execute(substring);
     }
@@ -238,6 +268,26 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
 
 
         return v;
+
+    }
+
+
+    private void saveData(String symbol){
+
+        // Gets the data repository in write mode
+        db = mDbHelper.getWritableDatabase();
+
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put(StockDBContract.StockEntry.COLUMN_NAME_SYMBOL, symbol);
+
+        // Insert the new row, returning the primary key value of the new row
+        long newRowId;
+        newRowId = db.insert( StockDBContract.StockEntry.TABLE_NAME,null,values);
+
+        if (newRowId > 0) {
+            Log.d("Stock data saved ", newRowId + " - " + symbol);
+        }
 
     }
 
@@ -323,6 +373,9 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
 
         @Override
         protected XmlPullParser doInBackground(String... params) {
+
+            newsTitle.clear();
+            newsLink.clear();
             try {
                     String urlString = params[0];
                     URL url = new URL(urlString);
@@ -400,7 +453,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
 
                 }
                 newsTitle.remove(0);
-                newsTitle.remove(1);
+                newsTitle.remove(0);
                 //Test this next
                 parsingComplete = false;
             }
@@ -440,11 +493,10 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
                     Log.d("HELP",response);
 
                         stockInfo.add(c.getString("name"));
-                        stockInfo.add(c.getString("symbol"));
+                    stockInfo.add(c.getString("symbol"));
                         stockInfo.add(c.getDouble("price"));
                         stockInfo.add(c.getDouble("change"));
-                        stockInfo.add(c.getDouble("volume"));
-                        Log.d("FUCK THIS SHIT",stockInfo.get(0).toString());
+                    stockInfo.add(c.getDouble("volume"));
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -461,9 +513,9 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
             try {
                 txtStockName.setText(stockInfo.get(0).toString());
                 txtStockSymbol.setText(stockInfo.get(1).toString());
-                txtStockPrice.setText(stockInfo.get(2).toString());
-                txtStockChange.setText(stockInfo.get(3).toString());
-                txtStockVolume.setText(stockInfo.get(4).toString());
+                txtStockPrice.setText("P: " + stockInfo.get(2).toString());
+                txtStockChange.setText("C: " + stockInfo.get(3).toString());
+                txtStockVolume.setText("V: " + stockInfo.get(4).toString());
             }
 
              catch (Exception e) {
@@ -471,6 +523,42 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
             }
         }
 
+
+    }
+
+    private Void checkDB(String symbol) {
+        Log.d("Rich", "Test");
+        Log.d("RICH", "STOCK CHANge");
+        db = mDbHelper.getReadableDatabase();
+        try {
+            Cursor c = db.rawQuery("SELECT * FROM " + StockDBContract.StockEntry.TABLE_NAME, null);
+
+            int Column1 = c.getColumnIndex("symbol");
+
+            // Check if our result was valid.
+            c.moveToFirst();
+            if (c != null) {
+                // Loop through all Results
+                do {
+                    String temp = c.getString(Column1);
+                    Log.d("RICH", "TESTING " + temp);
+                    if(temp == symbol)
+                    {
+                        btnAddRemove.setText("Remove");
+                        haveStock = true;
+                        Log.d("RICH", "STOCK CHANge");
+                    }
+                } while (c.moveToNext());
+            }
+
+        }catch(Exception e) {
+            Log.e("Error", "Error", e);
+        } finally {
+            if (db != null)
+                db.close();
+        }
+
+        return  null;
 
     }
 }
