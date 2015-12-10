@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -38,10 +39,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,6 +52,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.Buffer;
 import java.util.ArrayList;
 
 
@@ -62,6 +66,11 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     Button btn1month;
     Button btn6months;
     Button btn1year;
+    TextView txtStockName;
+    TextView txtStockSymbol;
+    TextView txtStockPrice;
+    TextView txtStockChange;
+    TextView txtStockVolume;
 
     AutoCompleteTextView advanced;
     ImageView stockGraph;
@@ -82,6 +91,13 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //mListener = (OnFragmentInteractionListener) getActivity();
+
+        txtStockName = (TextView) getActivity().findViewById(R.id.txtName);
+        txtStockSymbol =(TextView) getActivity().findViewById(R.id.txtSymbol);
+        txtStockPrice = (TextView) getActivity().findViewById(R.id.txtPrice);
+        txtStockChange = (TextView) getActivity().findViewById(R.id.txtChange);
+        txtStockVolume = (TextView) getActivity().findViewById(R.id.txtVolume);
+
         btnSearch = (Button) getActivity().findViewById(R.id.btnsearch);
             btnSearch.setOnClickListener(this);
         btnAddRemove = (Button) getActivity().findViewById(R.id.btnAddRemove);
@@ -159,6 +175,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
             case R.id.btnsearch:
                 symbol = advanced.getText().toString();
                 new AsyncGetGraph().execute("https://chart.yahoo.com/z?t=1d&s="+symbol);
+                new AsyncTextGetInfo().execute(symbol);
                 new AsyncGetNews().execute("http://finance.yahoo.com/rss/2.0/headline?s="+symbol+"&region=US&lang=en-US");
                 break;
 
@@ -395,36 +412,61 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    public class AsyncTextGetInfo extends AsyncTask<String, Void, String[]> {
+    public class AsyncTextGetInfo extends AsyncTask<String, Void, ArrayList> {
+        ArrayList stockInfo = new ArrayList();
         @Override
-        protected String[] doInBackground(String... params) {
-            String[] suggestions = null;
+        protected ArrayList doInBackground(String... params) {
+
+
+
             try {
-                String url = "http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=" + params[0];
+                String url = "http://finance.yahoo.com/webservice/v1/symbols/"+ symbol +"/quote?format=json&view=basic";
+                URL myUrl = new URL(url);
 
-                String response = new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream())).readLine();
-
-                try {
-                    JSONArray responseObject = new JSONArray(response);
-                    suggestions = new String[responseObject.length()];
-                    for (int i = 0; i < responseObject.length(); i++)
-                        suggestions[i] = responseObject.getJSONObject(i).getString("Symbol");
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(myUrl.openStream()));
+                String response ="", tmpResponse;
+                tmpResponse =reader.readLine();
+                while(tmpResponse != null)
+                {
+                    response = response+tmpResponse;
+                    tmpResponse = reader.readLine();
                 }
 
-            } catch (Exception e) {
+
+
+                try {
+                    JSONObject responseObject = new JSONObject(response);
+                    JSONObject c = responseObject.getJSONObject("list").getJSONArray("resources").getJSONObject(0).getJSONObject("resource").getJSONObject("fields");
+                    Log.d("HELP",response);
+
+                        stockInfo.add(c.getString("name"));
+                        stockInfo.add(c.getString("symbol"));
+                        stockInfo.add(c.getDouble("price"));
+                        stockInfo.add(c.getDouble("change"));
+                        stockInfo.add(c.getDouble("volume"));
+                        Log.d("FUCK THIS SHIT",stockInfo.get(0).toString());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return stockInfo;
+            }catch (Exception e) {
                 e.printStackTrace();
             }
-            return suggestions;
+            return stockInfo;
         }
 
         @Override
-        protected void onPostExecute(String[] suggestions) {
+        protected void onPostExecute(ArrayList stockInfo1) {
             try {
-                advanced.setAdapter(new ArrayAdapter<>(getActivity().getBaseContext(), android.R.layout.simple_dropdown_item_1line, suggestions));
-                advanced.setThreshold(2);
-            } catch (Exception e) {
+                txtStockName.setText(stockInfo.get(0).toString());
+                txtStockSymbol.setText(stockInfo.get(1).toString());
+                txtStockPrice.setText(stockInfo.get(2).toString());
+                txtStockChange.setText(stockInfo.get(3).toString());
+                txtStockVolume.setText(stockInfo.get(4).toString());
+            }
+
+             catch (Exception e) {
                 e.printStackTrace();
             }
         }
